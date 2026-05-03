@@ -69,3 +69,45 @@ run launch(200000, "Kerbal Station").
   circularisation may be needed.
 * After ascent is complete, use a dedicated rendezvous script to close the
   remaining gap and dock.
+
+---
+
+## `rendezvous_dock.ks` – Targeted Rendezvous and Docking
+
+Automated proximity-operations script for docking to the **currently selected
+target vessel** using the **closest free docking-port pair**.
+
+### Usage
+
+```kerboscript
+// Select the target vessel in-game, then run:
+run rendezvous_dock.
+```
+
+### What it does
+
+* Verifies that a target vessel is selected.
+* Finds all free docking ports on the active vessel and the target vessel.
+* Picks the nearest pair of free ports based on current port-to-port distance.
+* Switches control to the chosen active-vessel docking port.
+* Uses RCS translation to:
+  1. kill relative velocity,
+  2. move to staged standoff distances,
+  3. align with the target port,
+  4. perform the final docking approach.
+
+### Requirements
+
+* Both vessels must already be in a **close rendezvous** situation.
+* Both vessels need at least one **undocked docking port**.
+* The active vessel should have **RCS authority** suitable for translation.
+* The selected target should be a **vessel**, not a celestial body.
+
+### Notes
+
+* This script is intended for **near-field rendezvous and docking**, not for
+  long-range phasing from different orbits.
+* It assumes the nearest free target port is the desired docking port.
+* If docking does not complete, the script stops with the vessel aligned near
+  the target port so you can inspect clearance, port orientation, and control
+  authority.

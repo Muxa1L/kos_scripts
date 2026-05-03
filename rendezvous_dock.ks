@@ -38,6 +38,8 @@ local CFG_VELTOL_FAR     is 0.8.   // m/s relative-speed tolerance at far stando
 local CFG_VELTOL_MID     is 0.4.   // m/s relative-speed tolerance at mid standoff
 local CFG_VELTOL_NEAR    is 0.20.  // m/s relative-speed tolerance at near standoff
 local CFG_VELTOL_FINAL   is 0.12.  // m/s relative-speed tolerance at final standoff
+local CFG_DOCK_VEL       is 0.20.  // m/s max desired velocity during soft dock
+local CFG_DOCK_CMD       is 0.35.  // max translation command during soft dock
 
 function clamp {
     parameter v.
@@ -54,7 +56,7 @@ function clamp_mag {
     return vec:normalized * maxMag.
 }
 
-function stop_translation {
+function zero_translation_controls {
     set ship:control:starboard to 0.
     set ship:control:fore to 0.
     set ship:control:top to 0.
@@ -87,6 +89,9 @@ function collect_free_ports {
 function pick_port_pair {
     parameter ownPorts.
     parameter tgtPorts.
+    if ownPorts:length = 0 or tgtPorts:length = 0 {
+        return list(false, false, -1).
+    }
     local bestOwn  is ownPorts[0].
     local bestTgt  is tgtPorts[0].
     local bestDist is (bestTgt:nodeposition - bestOwn:nodeposition):mag.
@@ -134,7 +139,7 @@ function kill_relative_velocity {
         translate_world(-relative_velocity_to(tgtVessel) * 0.5).
         wait CFG_LOOP_WAIT.
     }
-    stop_translation.
+    zero_translation_controls.
 }
 
 function fly_to_standoff {
@@ -167,7 +172,7 @@ function fly_to_standoff {
         wait CFG_LOOP_WAIT.
     }
 
-    stop_translation.
+    zero_translation_controls.
 }
 
 function final_dock {
@@ -177,14 +182,14 @@ function final_dock {
     until ownPort:state <> "Ready" or tgtPort:state <> "Ready" {
         local posErr is tgtPort:nodeposition - ownPort:nodeposition.
         local relVel is relative_velocity_to(tgtPort:ship).
-        local desiredVel is clamp_mag(posErr * CFG_POS_GAIN, 0.20).
-        local cmd is clamp_mag(desiredVel - relVel * CFG_RVEL_GAIN, 0.35).
+        local desiredVel is clamp_mag(posErr * CFG_POS_GAIN, CFG_DOCK_VEL).
+        local cmd is clamp_mag(desiredVel - relVel * CFG_RVEL_GAIN, CFG_DOCK_CMD).
 
         translate_world(cmd).
         wait CFG_LOOP_WAIT.
     }
 
-    stop_translation.
+    zero_translation_controls.
 }
 
 function main {
@@ -210,6 +215,11 @@ function main {
     local pair is pick_port_pair(ownPorts, tgtPorts).
     local ownPort is pair[0].
     local tgtPort is pair[1].
+
+    if ownPort = false or tgtPort = false {
+        print "ERROR: Could not select a docking-port pair.".
+        return.
+    }
 
     clearscreen.
     print "=== kOS Rendezvous and Docking ===".
@@ -245,7 +255,7 @@ function main {
 
     unlock steering.
     unlock throttle.
-    stop_translation.
+    zero_translation_controls.
 
     if ownPort:state = "Ready" and tgtPort:state = "Ready" {
         print "Docking not completed - hold position and check alignment.".

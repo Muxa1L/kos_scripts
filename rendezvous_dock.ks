@@ -22,7 +22,7 @@ local CFG_POS_GAIN       is 0.08.  // position-error to desired-velocity gain
 local CFG_KILL_VEL       is 0.25.  // m/s tolerance for pre-approach stop
 local CFG_KILL_GAIN      is 0.50.  // controller gain while nulling rel velocity
 local CFG_ALIGN_TOL      is 3.00.  // deg allowed port misalignment
-local CFG_LOOP_WAIT      is 0.     // physics-tick loop wait
+local CFG_LOOP_WAIT      is 0.01.  // physics-tick loop wait
 local CFG_SPEED_DIST_K   is 0.12.  // approach-speed increase per metre of error
 local CFG_STANDOFF_FAR   is 120.   // m first hold point on the docking axis
 local CFG_STANDOFF_MID   is 40.    // m second hold point on the docking axis
@@ -91,9 +91,6 @@ function collect_free_ports {
 function pick_port_pair {
     parameter ownPorts.
     parameter tgtPorts.
-    if ownPorts:length = 0 or tgtPorts:length = 0 {
-        return list(false, false, -1).
-    }
     local bestOwn  is ownPorts[0].
     local bestTgt  is tgtPorts[0].
     local bestDist is (bestTgt:nodeposition - bestOwn:nodeposition):mag.
@@ -217,11 +214,6 @@ function main {
     local pair is pick_port_pair(ownPorts, tgtPorts).
     local ownPort is pair[0].
     local tgtPort is pair[1].
-
-    if ownPort = false or tgtPort = false {
-        print "ERROR: Could not select a docking-port pair.".
-        return.
-    }
 
     clearscreen.
     print "=== kOS Rendezvous and Docking ===".

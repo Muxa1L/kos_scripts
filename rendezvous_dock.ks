@@ -22,6 +22,22 @@ local CFG_POS_GAIN       is 0.08.  // position-error to desired-velocity gain
 local CFG_KILL_VEL       is 0.25.  // m/s tolerance for pre-approach stop
 local CFG_ALIGN_TOL      is 3.00.  // deg allowed port misalignment
 local CFG_LOOP_WAIT      is 0.     // physics-tick loop wait
+local CFG_STANDOFF_FAR   is 120.   // m first hold point on the docking axis
+local CFG_STANDOFF_MID   is 40.    // m second hold point on the docking axis
+local CFG_STANDOFF_NEAR  is 12.    // m third hold point on the docking axis
+local CFG_STANDOFF_FINAL is 3.     // m final hold point before soft dock
+local CFG_SPEED_FAR      is 6.0.   // m/s max speed for far standoff leg
+local CFG_SPEED_MID      is 2.5.   // m/s max speed for mid standoff leg
+local CFG_SPEED_NEAR     is 0.9.   // m/s max speed for near standoff leg
+local CFG_SPEED_FINAL    is 0.35.  // m/s max speed for final standoff leg
+local CFG_POSTOL_FAR     is 6.0.   // m position tolerance at far standoff
+local CFG_POSTOL_MID     is 2.0.   // m position tolerance at mid standoff
+local CFG_POSTOL_NEAR    is 0.7.   // m position tolerance at near standoff
+local CFG_POSTOL_FINAL   is 0.25.  // m position tolerance at final standoff
+local CFG_VELTOL_FAR     is 0.8.   // m/s relative-speed tolerance at far standoff
+local CFG_VELTOL_MID     is 0.4.   // m/s relative-speed tolerance at mid standoff
+local CFG_VELTOL_NEAR    is 0.20.  // m/s relative-speed tolerance at near standoff
+local CFG_VELTOL_FINAL   is 0.12.  // m/s relative-speed tolerance at final standoff
 
 function clamp {
     parameter v.
@@ -212,17 +228,17 @@ function main {
     print "Killing relative velocity...".
     kill_relative_velocity(tgtVessel, CFG_KILL_VEL).
 
-    print "Moving to 120 m standoff...".
-    fly_to_standoff(ownPort, tgtPort, 120, 6.0, 6.0, 0.8).
+    print "Moving to " + round(CFG_STANDOFF_FAR, 0) + " m standoff...".
+    fly_to_standoff(ownPort, tgtPort, CFG_STANDOFF_FAR, CFG_SPEED_FAR, CFG_POSTOL_FAR, CFG_VELTOL_FAR).
 
-    print "Moving to 40 m standoff...".
-    fly_to_standoff(ownPort, tgtPort, 40, 2.5, 2.0, 0.4).
+    print "Moving to " + round(CFG_STANDOFF_MID, 0) + " m standoff...".
+    fly_to_standoff(ownPort, tgtPort, CFG_STANDOFF_MID, CFG_SPEED_MID, CFG_POSTOL_MID, CFG_VELTOL_MID).
 
-    print "Moving to 12 m standoff...".
-    fly_to_standoff(ownPort, tgtPort, 12, 0.9, 0.7, 0.20).
+    print "Moving to " + round(CFG_STANDOFF_NEAR, 0) + " m standoff...".
+    fly_to_standoff(ownPort, tgtPort, CFG_STANDOFF_NEAR, CFG_SPEED_NEAR, CFG_POSTOL_NEAR, CFG_VELTOL_NEAR).
 
-    print "Moving to 3 m standoff...".
-    fly_to_standoff(ownPort, tgtPort, 3, 0.35, 0.25, 0.12).
+    print "Moving to " + round(CFG_STANDOFF_FINAL, 0) + " m standoff...".
+    fly_to_standoff(ownPort, tgtPort, CFG_STANDOFF_FINAL, CFG_SPEED_FINAL, CFG_POSTOL_FINAL, CFG_VELTOL_FINAL).
 
     print "Final docking approach...".
     final_dock(ownPort, tgtPort).

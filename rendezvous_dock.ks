@@ -47,9 +47,9 @@ function stop_translation {
 function translate_world {
     parameter vec.
     local cmd is clamp_mag(vec, 1).
-    set ship:control:starboard to cmd * ship:facing:starvector.
-    set ship:control:fore to cmd * ship:facing:forevector.
-    set ship:control:top to cmd * ship:facing:topvector.
+    set ship:control:starboard to vdot(cmd, ship:facing:starvector).
+    set ship:control:fore to vdot(cmd, ship:facing:forevector).
+    set ship:control:top to vdot(cmd, ship:facing:topvector).
 }
 
 function is_free_port {
@@ -71,9 +71,9 @@ function collect_free_ports {
 function pick_port_pair {
     parameter ownPorts.
     parameter tgtPorts.
-    local bestOwn  is 0.
-    local bestTgt  is 0.
-    local bestDist is 999999999.
+    local bestOwn  is ownPorts[0].
+    local bestTgt  is tgtPorts[0].
+    local bestDist is (bestTgt:nodeposition - bestOwn:nodeposition):mag.
 
     for ownPort in ownPorts {
         for tgtPort in tgtPorts {

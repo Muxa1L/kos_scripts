@@ -20,8 +20,10 @@ local CFG_SAFE_VEL       is 0.15.  // m/s minimum controller speed cap
 local CFG_RVEL_GAIN      is 1.00.  // relative-velocity damping gain
 local CFG_POS_GAIN       is 0.08.  // position-error to desired-velocity gain
 local CFG_KILL_VEL       is 0.25.  // m/s tolerance for pre-approach stop
+local CFG_KILL_GAIN      is 0.50.  // controller gain while nulling rel velocity
 local CFG_ALIGN_TOL      is 3.00.  // deg allowed port misalignment
 local CFG_LOOP_WAIT      is 0.     // physics-tick loop wait
+local CFG_SPEED_DIST_K   is 0.12.  // approach-speed increase per metre of error
 local CFG_STANDOFF_FAR   is 120.   // m first hold point on the docking axis
 local CFG_STANDOFF_MID   is 40.    // m second hold point on the docking axis
 local CFG_STANDOFF_NEAR  is 12.    // m third hold point on the docking axis
@@ -124,7 +126,7 @@ function relative_velocity_to {
 function desired_standoff_speed {
     parameter distance.
     parameter maxSpeed.
-    return clamp(distance * 0.12, CFG_SAFE_VEL, maxSpeed).
+    return clamp(distance * CFG_SPEED_DIST_K, CFG_SAFE_VEL, maxSpeed).
 }
 
 function hold_target_alignment {
@@ -136,7 +138,7 @@ function kill_relative_velocity {
     parameter tgtVessel.
     parameter tol.
     until relative_velocity_to(tgtVessel):mag < tol {
-        translate_world(-relative_velocity_to(tgtVessel) * 0.5).
+        translate_world(-relative_velocity_to(tgtVessel) * CFG_KILL_GAIN).
         wait CFG_LOOP_WAIT.
     }
     zero_translation_controls.

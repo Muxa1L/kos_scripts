@@ -24,12 +24,15 @@ local CFG_ALIGN_TOL      is 3.00.  // deg allowed port misalignment
 local CFG_LOOP_WAIT      is 0.     // physics-tick loop wait
 
 function clamp {
-    parameter v, lo, hi.
+    parameter v.
+    parameter lo.
+    parameter hi.
     return max(lo, min(hi, v)).
 }
 
 function clamp_mag {
-    parameter vec, maxMag.
+    parameter vec.
+    parameter maxMag.
     if vec:mag <= maxMag { return vec. }
     if maxMag <= 0       { return V(0,0,0). }
     return vec:normalized * maxMag.
@@ -66,7 +69,8 @@ function collect_free_ports {
 }
 
 function pick_port_pair {
-    parameter ownPorts, tgtPorts.
+    parameter ownPorts.
+    parameter tgtPorts.
     local bestOwn  is 0.
     local bestTgt  is 0.
     local bestDist is 999999999.
@@ -86,7 +90,8 @@ function pick_port_pair {
 }
 
 function port_alignment_error {
-    parameter ownPort, tgtPort.
+    parameter ownPort.
+    parameter tgtPort.
     return vang(ownPort:portfacing:vector, -tgtPort:portfacing:vector).
 }
 
@@ -96,7 +101,8 @@ function relative_velocity_to {
 }
 
 function desired_standoff_speed {
-    parameter distance, maxSpeed.
+    parameter distance.
+    parameter maxSpeed.
     return clamp(distance * 0.12, CFG_SAFE_VEL, maxSpeed).
 }
 
@@ -106,7 +112,8 @@ function hold_target_alignment {
 }
 
 function kill_relative_velocity {
-    parameter tgtVessel, tol.
+    parameter tgtVessel.
+    parameter tol.
     until relative_velocity_to(tgtVessel):mag < tol {
         translate_world(-relative_velocity_to(tgtVessel) * 0.5).
         wait CFG_LOOP_WAIT.
@@ -115,7 +122,12 @@ function kill_relative_velocity {
 }
 
 function fly_to_standoff {
-    parameter ownPort, tgtPort, standoff, maxSpeed, posTol, velTol.
+    parameter ownPort.
+    parameter tgtPort.
+    parameter standoff.
+    parameter maxSpeed.
+    parameter posTol.
+    parameter velTol.
 
     until false {
         if ownPort:state <> "Ready" or tgtPort:state <> "Ready" { break. }
@@ -143,7 +155,8 @@ function fly_to_standoff {
 }
 
 function final_dock {
-    parameter ownPort, tgtPort.
+    parameter ownPort.
+    parameter tgtPort.
 
     until ownPort:state <> "Ready" or tgtPort:state <> "Ready" {
         local posErr is tgtPort:nodeposition - ownPort:nodeposition.
@@ -186,8 +199,8 @@ function main {
     print "=== kOS Rendezvous and Docking ===".
     print "Target vessel : " + tgtVessel:name.
     print "Initial range : " + round(pair[2], 1) + " m".
-    print "Own port      : " + ownPort:part:title.
-    print "Target port   : " + tgtPort:part:title.
+    print "Own port      : " + ownPort:part:name.
+    print "Target port   : " + tgtPort:part:name.
 
     sas off.
     rcs on.

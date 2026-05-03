@@ -70,7 +70,7 @@ function translate_world {
 
 function is_free_port {
     parameter port.
-    return port:state = "Ready".
+    return (port:state = "Ready").
 }
 
 function collect_free_ports {
@@ -134,7 +134,7 @@ function kill_relative_velocity {
         translate_world(-relative_velocity_to(tgtVessel) * 0.5).
         wait CFG_LOOP_WAIT.
     }
-    stop_translation().
+    stop_translation.
 }
 
 function fly_to_standoff {
@@ -167,7 +167,7 @@ function fly_to_standoff {
         wait CFG_LOOP_WAIT.
     }
 
-    stop_translation().
+    stop_translation.
 }
 
 function final_dock {
@@ -184,7 +184,7 @@ function final_dock {
         wait CFG_LOOP_WAIT.
     }
 
-    stop_translation().
+    stop_translation.
 }
 
 function main {
@@ -221,7 +221,7 @@ function main {
     sas off.
     rcs on.
     lock throttle to 0.
-    ownPort:controlfrom().
+    ownPort:controlfrom.
     hold_target_alignment(tgtPort).
 
     print "".
@@ -245,7 +245,7 @@ function main {
 
     unlock steering.
     unlock throttle.
-    stop_translation().
+    stop_translation.
 
     if ownPort:state = "Ready" and tgtPort:state = "Ready" {
         print "Docking not completed - hold position and check alignment.".
@@ -254,4 +254,4 @@ function main {
     }
 }
 
-main().
+main.
